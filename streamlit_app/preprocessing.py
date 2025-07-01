@@ -3,7 +3,7 @@ from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 import nltk
-import numpy as np # Add numpy import
+import numpy as np
 
 # Ensure NLTK data is downloaded
 nltk.download('punkt', quiet=True)
