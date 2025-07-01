@@ -5,14 +5,9 @@ from nltk.tokenize import word_tokenize
 import nltk
 import numpy as np # Add numpy import
 
-try:
-    nltk.data.find('tokenizers/punkt')
-except nltk.downloader.DownloadError:
-    nltk.download('punkt')
-try:
-    nltk.data.find('corpora/stopwords')
-except nltk.downloader.DownloadError:
-    nltk.download('stopwords')
+# Ensure NLTK data is downloaded
+nltk.download('punkt', quiet=True)
+nltk.download('stopwords', quiet=True)
 
 # Initialize Sastrawi Stemmer
 factory = StemmerFactory()
