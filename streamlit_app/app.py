@@ -163,6 +163,23 @@ elif page == "Hasil Evaluasi Model":
         ax_svm.set_ylabel('Actual Labels')
         st.pyplot(fig_svm)
 
+        st.write("### Laporan Klasifikasi")
+        # Calculate classification report
+        # For simplicity, using dummy y_true and y_pred to generate a report-like table
+        # In a real scenario, you'd have actual y_true and y_pred from evaluation
+        y_true_svm = []
+        y_pred_svm = []
+        cm_svm = svm_eval["confusion_matrix"]
+        for i, true_label in enumerate(labels):
+            for j, pred_label in enumerate(labels):
+                count = cm_svm[i, j]
+                y_true_svm.extend([reverse_label_mapping[true_label]] * count)
+                y_pred_svm.extend([reverse_label_mapping[pred_label]] * count)
+        
+        report_svm = classification_report(y_true_svm, y_pred_svm, target_names=labels, output_dict=True)
+        report_df_svm = pd.DataFrame(report_svm).transpose()
+        st.dataframe(report_df_svm)
+
     with col2:
         st.subheader(f"XGBoost ({split_choice})")
         xgb_eval = evaluation_data[split_choice]["XGBoost"]
@@ -178,3 +195,39 @@ elif page == "Hasil Evaluasi Model":
         ax_xgb.set_xlabel('Predicted Labels')
         ax_xgb.set_ylabel('Actual Labels')
         st.pyplot(fig_xgb)
+
+        st.write("### Laporan Klasifikasi")
+        # Calculate classification report
+        y_true_xgb = []
+        y_pred_xgb = []
+        cm_xgb = xgb_eval["confusion_matrix"]
+        for i, true_label in enumerate(labels):
+            for j, pred_label in enumerate(labels):
+                count = cm_xgb[i, j]
+                y_true_xgb.extend([reverse_label_mapping[true_label]] * count)
+                y_pred_xgb.extend([reverse_label_mapping[pred_label]] * count)
+
+        report_xgb = classification_report(y_true_xgb, y_pred_xgb, target_names=labels, output_dict=True)
+        report_df_xgb = pd.DataFrame(report_xgb).transpose()
+        st.dataframe(report_df_xgb)
+
+    st.subheader("Perbandingan Model Berdasarkan Akurasi")
+    accuracy_data = []
+    for split, models_data in evaluation_data.items():
+        for model_type, data in models_data.items():
+            accuracy_data.append({
+                "Model": f"{model_type} {split}",
+                "Accuracy": data["metrics"]["Accuracy"]
+            })
+    accuracy_df = pd.DataFrame(accuracy_data)
+    accuracy_df = accuracy_df.sort_values(by="Accuracy", ascending=False).reset_index(drop=True)
+    st.dataframe(accuracy_df)
+
+    st.write("### Visualisasi Perbandingan Akurasi")
+    fig_accuracy, ax_accuracy = plt.subplots(figsize=(10, 6))
+    sns.barplot(x="Accuracy", y="Model", data=accuracy_df, palette="viridis", ax=ax_accuracy)
+    ax_accuracy.set_title("Perbandingan Akurasi Model Berdasarkan Rasio Split Data")
+    ax_accuracy.set_xlabel("Akurasi")
+    ax_accuracy.set_ylabel("Model")
+    st.pyplot(fig_accuracy)
+
