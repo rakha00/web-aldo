@@ -45,9 +45,6 @@ models = {
     "SVM Split 80:20": joblib.load(os.path.join(models_path, 'best_svm_model_8020.pkl')),
     "SVM Split 70:30": joblib.load(os.path.join(models_path, 'best_svm_model_7030.pkl')),
     "SVM Split 60:40": joblib.load(os.path.join(models_path, 'best_svm_model_6040.pkl')),
-    "XGBoost Split 80:20": joblib.load(os.path.join(models_path, 'best_xgb_model_8020.pkl')),
-    "XGBoost Split 70:30": joblib.load(os.path.join(models_path, 'best_xgb_model_7030.pkl')),
-    "XGBoost Split 60:40": joblib.load(os.path.join(models_path, 'best_xgb_model_6040.pkl')),
 }
 
 # Mapping for labels
@@ -88,12 +85,6 @@ evaluation_data = {
             },
             "confusion_matrix": np.array([[424, 56, 26], [76, 169, 20], [56, 21, 166]])
         },
-        "XGBoost": {
-            "metrics": {
-                "Accuracy": 0.73, "Precision": 0.73, "Recall": 0.69, "F1-Score": 0.70
-            },
-            "confusion_matrix": np.array([[426, 53, 27], [92, 160, 13], [69, 23, 151]])
-        }
     },
     "70:30": {
         "SVM": {
@@ -101,12 +92,6 @@ evaluation_data = {
                 "Accuracy": 0.75, "Precision": 0.75, "Recall": 0.72, "F1-Score": 0.73
             },
             "confusion_matrix": np.array([[646, 80, 32], [115, 256, 27], [91, 34, 239]])
-        },
-        "XGBoost": {
-            "metrics": {
-                "Accuracy": 0.73, "Precision": 0.74, "Recall": 0.69, "F1-Score": 0.70
-            },
-            "confusion_matrix": np.array([[643, 88, 27], [141, 240, 17], [112, 32, 220]])
         }
     },
     "60:40": {
@@ -115,12 +100,6 @@ evaluation_data = {
                 "Accuracy": 0.74, "Precision": 0.74, "Recall": 0.71, "F1-Score": 0.72
             },
             "confusion_matrix": np.array([[843, 110, 58], [141, 349, 40], [130, 44, 312]])
-        },
-        "XGBoost": {
-            "metrics": {
-                "Accuracy": 0.72, "Precision": 0.72, "Recall": 0.69, "F1-Score": 0.70
-            },
-            "confusion_matrix": np.array([[840, 117, 54], [169, 335, 26], [140, 58, 288]])
         }
     }
 }
@@ -194,36 +173,6 @@ elif page == "Hasil Evaluasi Model":
         report_df_svm = pd.DataFrame(report_svm).transpose()
         st.dataframe(report_df_svm)
 
-    with col2:
-        st.subheader(f"XGBoost ({split_choice})")
-        xgb_eval = evaluation_data[split_choice]["XGBoost"]
-        st.write("### Metrik Klasifikasi")
-        metrics_df_xgb = pd.DataFrame([xgb_eval["metrics"]])
-        st.dataframe(metrics_df_xgb, hide_index=True)
-
-        st.write("### Confusion Matrix")
-        fig_xgb, ax_xgb = plt.subplots(figsize=(6, 5))
-        sns.heatmap(xgb_eval["confusion_matrix"], annot=True, fmt='d', cmap='RdPu',
-                    xticklabels=labels, yticklabels=labels, ax=ax_xgb)
-        ax_xgb.set_title(f'XGBoost Confusion Matrix ({split_choice})')
-        ax_xgb.set_xlabel('Predicted Labels')
-        ax_xgb.set_ylabel('Actual Labels')
-        st.pyplot(fig_xgb)
-
-        st.write("### Laporan Klasifikasi")
-        # Calculate classification report
-        y_true_xgb = []
-        y_pred_xgb = []
-        cm_xgb = xgb_eval["confusion_matrix"]
-        for i, true_label in enumerate(labels):
-            for j, pred_label in enumerate(labels):
-                count = cm_xgb[i, j]
-                y_true_xgb.extend([reverse_label_mapping[true_label]] * count)
-                y_pred_xgb.extend([reverse_label_mapping[pred_label]] * count)
-
-        report_xgb = classification_report(y_true_xgb, y_pred_xgb, target_names=labels, output_dict=True)
-        report_df_xgb = pd.DataFrame(report_xgb).transpose()
-        st.dataframe(report_df_xgb)
 
     st.subheader("Perbandingan Model Berdasarkan Akurasi")
     accuracy_data = []
@@ -239,7 +188,7 @@ elif page == "Hasil Evaluasi Model":
 
     st.write("### Visualisasi Perbandingan Akurasi")
     fig_accuracy, ax_accuracy = plt.subplots(figsize=(10, 6))
-    sns.barplot(x="Accuracy", y="Model", data=accuracy_df, palette="viridis", ax=ax_accuracy)
+    sns.barplot(x="Accuracy", y="Model", data=accuracy_df, hue="Model", palette="viridis", ax=ax_accuracy, legend=False)
     ax_accuracy.set_title("Perbandingan Akurasi Model Berdasarkan Rasio Split Data")
     ax_accuracy.set_xlabel("Akurasi")
     ax_accuracy.set_ylabel("Model")
